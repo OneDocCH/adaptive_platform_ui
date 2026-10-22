@@ -1320,7 +1320,7 @@ When running on iOS 26+, widgets automatically use **native UIKit platform views
 ### Interaction
 - **Press states**: Visual feedback with scale animation
 - **Gesture handling**: Native UIKit gesture recognizers
-- **Haptic feedback**: Medium impact feedback on interactions
+- **Haptic feedback**: Medium impact feedback on interactions; pass `enableHapticFeedback: false` to `AdaptiveButton`, `AdaptiveSwitch`, `AdaptiveSegmentedControl` or `AdaptiveSlider` to turn it off
 - **Disabled states**: Proper opacity and interaction blocking
 
 ### Typography

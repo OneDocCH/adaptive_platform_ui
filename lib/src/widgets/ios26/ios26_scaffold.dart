@@ -216,6 +216,8 @@ class _IOS26ScaffoldState extends State<IOS26Scaffold>
             onPressed: () => Navigator.of(context).pop(),
             sfSymbol: SFSymbol("chevron.left", size: 20),
             useSmoothRectangleBorder: false,
+            // No haptic, like the system back button it stands in for.
+            enableHapticFeedback: false,
           ),
         );
         heroLeading = widget.useHeroBackButton

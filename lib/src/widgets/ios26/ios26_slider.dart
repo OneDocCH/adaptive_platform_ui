@@ -26,6 +26,7 @@ class IOS26Slider extends StatefulWidget {
     this.max = 1.0,
     this.activeColor,
     this.thumbColor,
+    this.enableHapticFeedback = true,
   });
 
   /// The currently selected value for this slider
@@ -51,6 +52,9 @@ class IOS26Slider extends StatefulWidget {
 
   /// The color of the thumb
   final Color? thumbColor;
+
+  /// Whether slider interactions trigger native haptic feedback.
+  final bool enableHapticFeedback;
 
   @override
   State<IOS26Slider> createState() => _IOS26SliderState();
@@ -150,6 +154,12 @@ class _IOS26SliderState extends State<IOS26Slider> {
         'enabled': widget.onChanged != null,
       });
     }
+
+    if (oldWidget.enableHapticFeedback != widget.enableHapticFeedback) {
+      _channel.invokeMethod('setEnableHapticFeedback', {
+        'enabled': widget.enableHapticFeedback,
+      });
+    }
   }
 
   Map<String, dynamic> _buildCreationParams() {
@@ -159,6 +169,7 @@ class _IOS26SliderState extends State<IOS26Slider> {
       'min': widget.min,
       'max': widget.max,
       'enabled': widget.onChanged != null,
+      'enableHapticFeedback': widget.enableHapticFeedback,
       if (widget.activeColor != null)
         'activeColor': _colorToARGB(widget.activeColor!),
       if (widget.thumbColor != null)

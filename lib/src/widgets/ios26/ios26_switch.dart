@@ -22,6 +22,7 @@ class IOS26Switch extends StatefulWidget {
     required this.onChanged,
     this.activeColor,
     this.thumbColor,
+    this.enableHapticFeedback = true,
   });
 
   /// Whether this switch is on or off
@@ -35,6 +36,9 @@ class IOS26Switch extends StatefulWidget {
 
   /// The color of the thumb (handle)
   final Color? thumbColor;
+
+  /// Whether toggling the switch triggers native haptic feedback.
+  final bool enableHapticFeedback;
 
   @override
   State<IOS26Switch> createState() => _IOS26SwitchState();
@@ -118,6 +122,12 @@ class _IOS26SwitchState extends State<IOS26Switch> {
         'enabled': widget.onChanged != null,
       });
     }
+
+    if (oldWidget.enableHapticFeedback != widget.enableHapticFeedback) {
+      _channel.invokeMethod('setEnableHapticFeedback', {
+        'enabled': widget.enableHapticFeedback,
+      });
+    }
   }
 
   Map<String, dynamic> _buildCreationParams() {
@@ -125,6 +135,7 @@ class _IOS26SwitchState extends State<IOS26Switch> {
       'id': _id,
       'value': widget.value,
       'enabled': widget.onChanged != null,
+      'enableHapticFeedback': widget.enableHapticFeedback,
       if (widget.activeColor != null)
         'activeColor': _colorToARGB(widget.activeColor!),
       if (widget.thumbColor != null)

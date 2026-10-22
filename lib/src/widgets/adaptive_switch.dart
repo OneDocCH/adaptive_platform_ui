@@ -30,6 +30,7 @@ class AdaptiveSwitch extends StatelessWidget {
     required this.onChanged,
     this.activeColor,
     this.thumbColor,
+    this.enableHapticFeedback = true,
   });
 
   /// Whether this switch is on or off
@@ -56,6 +57,9 @@ class AdaptiveSwitch extends StatelessWidget {
   /// On Android: The color of the circular knob
   final Color? thumbColor;
 
+  /// Whether the native iOS 26 switch triggers haptic feedback when toggled.
+  final bool enableHapticFeedback;
+
   @override
   Widget build(BuildContext context) {
     // iOS 26+ - Use native iOS 26 switch
@@ -65,6 +69,7 @@ class AdaptiveSwitch extends StatelessWidget {
         onChanged: onChanged,
         activeColor: activeColor,
         thumbColor: thumbColor,
+        enableHapticFeedback: enableHapticFeedback,
       );
     }
 

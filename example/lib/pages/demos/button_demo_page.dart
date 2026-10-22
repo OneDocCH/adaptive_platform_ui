@@ -158,6 +158,29 @@ class _ButtonDemoPageState extends State<ButtonDemoPage> {
             ),
             const SizedBox(height: 16),
             Text(
+              'Without Haptic Feedback (iOS 26+)',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: PlatformInfo.isIOS
+                    ? (MediaQuery.platformBrightnessOf(context) ==
+                              Brightness.dark
+                          ? CupertinoColors.white
+                          : CupertinoColors.black)
+                    : Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: AdaptiveButton(
+                onPressed: () => _showMessage(context, 'Silent button pressed'),
+                label: 'Click Me Silently',
+                enableHapticFeedback: false,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
               'Button with Icon',
               style: TextStyle(
                 fontSize: 14,

@@ -47,6 +47,7 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
     private var iconSize: CGFloat?
     private var iconColor: UIColor?
     private var useSmoothRectangleBorder: Bool = true
+    private var enableHapticFeedback: Bool = true
 
     init(
         frame: CGRect,
@@ -64,6 +65,7 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
             buttonSize = config["size"] as? String ?? "medium"
             isEnabled = config["enabled"] as? Bool ?? true
             isDark = config["isDark"] as? Bool ?? false
+            enableHapticFeedback = config["enableHapticFeedback"] as? Bool ?? true
 
             if let colorHex = config["color"] as? String {
                 buttonColor = UIColor(hexString: colorHex) ?? .systemBlue
@@ -332,9 +334,11 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
         // Notify Flutter side about button press
         channel.invokeMethod("pressed", arguments: nil)
 
-        // Add haptic feedback for iOS 26
-        let impact = UIImpactFeedbackGenerator(style: .medium)
-        impact.impactOccurred()
+        // Trigger haptics only when enabled by the Flutter widget.
+        if enableHapticFeedback {
+            let impact = UIImpactFeedbackGenerator(style: .medium)
+            impact.impactOccurred()
+        }
     }
 
     private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -361,6 +365,13 @@ class iOS26ButtonView: NSObject, FlutterPlatformView {
                 isEnabled = enabled
                 button.isEnabled = enabled
                 button.alpha = enabled ? 1.0 : 0.5
+            }
+            result(nil)
+
+        case "setEnableHapticFeedback":
+            if let args = call.arguments as? [String: Any],
+               let enabled = args["enabled"] as? Bool {
+                enableHapticFeedback = enabled
             }
             result(nil)
 

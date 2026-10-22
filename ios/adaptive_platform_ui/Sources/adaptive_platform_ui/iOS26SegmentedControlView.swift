@@ -38,6 +38,7 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
     private var tintColor: UIColor?
     private var textColor: UIColor?
     private var selectedTextColor: UIColor?
+    private var enableHapticFeedback: Bool = true
 
     init(
         frame: CGRect,
@@ -50,6 +51,7 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
         if let config = args as? [String: Any] {
             controlId = config["id"] as? Int ?? 0
             isDark = config["isDark"] as? Bool ?? false
+            enableHapticFeedback = config["enableHapticFeedback"] as? Bool ?? true
         } else {
             controlId = 0
         }
@@ -199,8 +201,11 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
         applyTheme()
         channel.invokeMethod("valueChanged", arguments: ["index": segmentedControl.selectedSegmentIndex])
 
-        let impact = UIImpactFeedbackGenerator(style: .light)
-        impact.impactOccurred()
+        // Trigger haptics only when enabled by the Flutter widget.
+        if enableHapticFeedback {
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred()
+        }
     }
 
     private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -213,6 +218,13 @@ class iOS26SegmentedControlView: NSObject, FlutterPlatformView {
                 } else if index == -1 {
                     segmentedControl.selectedSegmentIndex = UISegmentedControl.noSegment
                 }
+            }
+            result(nil)
+
+        case "setEnableHapticFeedback":
+            if let args = call.arguments as? [String: Any],
+               let enabled = args["enabled"] as? Bool {
+                enableHapticFeedback = enabled
             }
             result(nil)
 

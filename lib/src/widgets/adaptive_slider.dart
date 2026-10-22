@@ -36,6 +36,7 @@ class AdaptiveSlider extends StatelessWidget {
     this.label,
     this.activeColor,
     this.thumbColor,
+    this.enableHapticFeedback = true,
   });
 
   /// The currently selected value for this slider
@@ -82,6 +83,9 @@ class AdaptiveSlider extends StatelessWidget {
   /// The color of the thumb
   final Color? thumbColor;
 
+  /// Whether native iOS 26 slider interactions trigger haptic feedback.
+  final bool enableHapticFeedback;
+
   @override
   Widget build(BuildContext context) {
     // iOS 26+ - Use native iOS 26 slider
@@ -95,6 +99,7 @@ class AdaptiveSlider extends StatelessWidget {
         max: max,
         activeColor: activeColor,
         thumbColor: thumbColor,
+        enableHapticFeedback: enableHapticFeedback,
       );
     }
 
