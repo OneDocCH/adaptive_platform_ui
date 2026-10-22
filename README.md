@@ -159,6 +159,25 @@ AdaptiveScaffold(
   body: YourContent(),
 )
 ```
+
+**Search tab on iOS 27:**
+
+iOS 27 keeps an `isSearch` destination detached from the other tabs only when
+the bar is drawn by a `UITabBarController`. Set `useTabBarController` for a bar
+with a search destination: the search tab becomes a native `UISearchTab`, and a
+tap on it is reported through `onTap` like any other tab.
+
+```dart
+AdaptiveBottomNavigationBar(
+  useTabBarController: true, // iOS 26+: draw the bar with a UITabBarController
+  items: [
+    AdaptiveNavigationDestination(icon: 'house', label: 'Home'),
+    AdaptiveNavigationDestination(icon: 'magnifyingglass', label: 'Search', isSearch: true),
+  ],
+  selectedIndex: 0,
+  onTap: (index) {},
+)
+```
 **Toolbar menu:**
 
 Give an action `menuItems` instead of `onPressed` and tapping it opens a menu,
