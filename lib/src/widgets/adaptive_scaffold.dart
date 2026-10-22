@@ -1262,6 +1262,8 @@ class _AnimatedBackButtonState extends State<_AnimatedBackButton>
         child: AdaptiveButton.sfSymbol(
           onPressed: _handlePressed,
           sfSymbol: SFSymbol("chevron.left", size: 20),
+          // No haptic, like the system back button it stands in for.
+          enableHapticFeedback: false,
         ),
       ),
     );
