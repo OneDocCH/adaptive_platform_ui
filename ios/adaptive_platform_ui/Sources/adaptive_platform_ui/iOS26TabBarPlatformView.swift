@@ -842,6 +842,9 @@ class iOS26TabBarPlatformView: NSObject, FlutterPlatformView, UITabBarDelegate {
         return UIColor(red: r, green: g, blue: b, alpha: a)
     }
 
+    // The image code below is also available, shared, as `TabBarItemImages`, which
+    // `iOS26TabControllerPlatformView` uses. This view's builders can move onto it.
+
     private func runtimeFilePath(for index: Int, selected: Bool) -> String {
         let paths = selected ? currentSelectedFileIcons : currentFileIcons
         if index < paths.count, !paths[index].isEmpty {
@@ -1015,6 +1018,18 @@ class iOS26TabBarViewFactory: NSObject, FlutterPlatformViewFactory {
         viewIdentifier viewId: Int64,
         arguments args: Any?
     ) -> FlutterPlatformView {
+        // `useTabBarController` draws the bar with a `UITabBarController` instead: the only way to
+        // keep a search tab detached on iOS 27 (see `iOS26TabControllerPlatformView`).
+        if #available(iOS 26.0, *),
+           let dict = args as? [String: Any],
+           (dict["useTabBarController"] as? Bool) == true {
+            return iOS26TabControllerPlatformView(
+                frame: frame,
+                viewId: viewId,
+                args: args,
+                messenger: messenger
+            )
+        }
         return iOS26TabBarPlatformView(
             frame: frame,
             viewId: viewId,

@@ -19,6 +19,7 @@ class IOS26NativeTabBar extends StatefulWidget {
     this.minimizeBehavior = TabBarMinimizeBehavior.automatic,
     this.showNativeView = true,
     this.hidden = false,
+    this.useTabBarController = false,
   });
 
   final List<AdaptiveNavigationDestination> destinations;
@@ -38,6 +39,10 @@ class IOS26NativeTabBar extends StatefulWidget {
   /// Tab bar minimize behavior (iOS 26+)
   /// Controls how the tab bar minimizes when scrolling
   final TabBarMinimizeBehavior minimizeBehavior;
+
+  /// Whether the native view draws the bar with a UITabBarController
+  /// (see `AdaptiveBottomNavigationBar.useTabBarController`).
+  final bool useTabBarController;
 
   @override
   State<IOS26NativeTabBar> createState() => _IOS26NativeTabBarState();
@@ -68,8 +73,10 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
   TabBarMinimizeBehavior? _lastMinimizeBehavior;
   bool? _lastHidden;
 
-  bool get _isDark =>
-      MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+  // The app's brightness, which can differ from the system's: under a MaterialApp the
+  // Cupertino theme carries the Material one, and with no brightness set it falls back
+  // to the platform's.
+  bool get _isDark => CupertinoTheme.brightnessOf(context) == Brightness.dark;
   bool get _isRtl => Directionality.of(context) == TextDirection.rtl;
   Color? get _effectiveTint =>
       widget.tint ?? CupertinoTheme.of(context).primaryColor;
@@ -98,11 +105,8 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
     // Resolve CupertinoDynamicColor if needed
     Color resolvedColor = color;
     if (color is CupertinoDynamicColor) {
-      // Resolve based on current brightness
-      final brightness = MediaQuery.platformBrightnessOf(context);
-      resolvedColor = brightness == Brightness.dark
-          ? color.darkColor
-          : color.color;
+      // Resolve based on the app's current brightness
+      resolvedColor = _isDark ? color.darkColor : color.color;
     }
 
     return ((resolvedColor.a * 255.0).round() & 0xff) << 24 |
@@ -232,6 +236,7 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
         'isDark': _isDark,
         'isRtl': _isRtl,
         'minimizeBehavior': widget.minimizeBehavior.index,
+        'useTabBarController': widget.useTabBarController,
         if (_effectiveTint != null) 'tint': _colorToARGB(_effectiveTint!),
         if (widget.unselectedItemTint != null)
           'unselectedItemTint': _colorToARGB(widget.unselectedItemTint!),
@@ -241,6 +246,9 @@ class _IOS26NativeTabBarState extends State<IOS26NativeTabBar> {
 
       final platformView = widget.showNativeView
           ? UiKitView(
+              // The native view is picked when it is created, so a new one is needed when this
+              // flag changes.
+              key: ValueKey(widget.useTabBarController),
               viewType: 'adaptive_platform_ui/ios26_tab_bar',
               creationParams: creationParams,
               creationParamsCodec: const StandardMessageCodec(),
