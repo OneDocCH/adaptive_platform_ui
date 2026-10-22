@@ -578,6 +578,8 @@ class _AdaptiveScaffoldState extends State<AdaptiveScaffold> {
             unselectedItemColor:
                 widget.bottomNavigationBar!.unselectedItemColor,
             hidden: widget.tabBarHidden,
+            useTabBarController:
+                widget.bottomNavigationBar!.useTabBarController,
           );
         }
         // iOS 26+ with useNativeBottomBar=false OR iOS <26
@@ -1073,6 +1075,7 @@ class _MinimizableTabBar extends StatefulWidget {
     this.selectedItemColor,
     this.unselectedItemColor,
     this.hidden = false,
+    this.useTabBarController = false,
   });
 
   final int selectedIndex;
@@ -1083,6 +1086,7 @@ class _MinimizableTabBar extends StatefulWidget {
   final Color? selectedItemColor;
   final Color? unselectedItemColor;
   final bool hidden;
+  final bool useTabBarController;
 
   @override
   State<_MinimizableTabBar> createState() => _MinimizableTabBarState();
@@ -1193,6 +1197,7 @@ class _MinimizableTabBarState extends State<_MinimizableTabBar>
         unselectedItemTint: widget.unselectedItemColor,
         minimizeBehavior: widget.minimizeBehavior,
         hidden: widget.hidden,
+        useTabBarController: widget.useTabBarController,
       ),
     );
   }

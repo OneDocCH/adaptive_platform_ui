@@ -21,6 +21,7 @@ class AdaptiveBottomNavigationBar {
     this.selectedIndex,
     this.onTap,
     this.useNativeBottomBar = true,
+    this.useTabBarController = false,
     this.cupertinoTabBar,
     this.bottomNavigationBar,
     this.selectedItemColor,
@@ -49,6 +50,20 @@ class AdaptiveBottomNavigationBar {
   /// If true, [cupertinoTabBar] will be ignored on iOS 26+ and native tab bar will be shown.
   /// For iOS <26, if [cupertinoTabBar] is provided, it will be used regardless of this setting.
   final bool useNativeBottomBar;
+
+  /// Draw the native iOS 26+ bottom bar with a UITabBarController (iOS 26+ only)
+  /// - When false (default): a standalone UITabBar, as before
+  /// - When true: a UITabBarController built from UITabs, with a UISearchTab for the
+  ///   [AdaptiveNavigationDestination.isSearch] destination
+  ///
+  /// iOS 27 keeps a search tab detached from the others only through the tab bar
+  /// controller, so set this when the bar has a search destination. The bar also
+  /// follows the app's brightness rather than the system's, and a search tab keeps
+  /// the system magnifying glass glyph.
+  ///
+  /// Read when the native bar is created; changing it creates a new one. Ignored
+  /// unless [useNativeBottomBar] is true.
+  final bool useTabBarController;
 
   /// Custom CupertinoTabBar for iOS
   ///
@@ -94,6 +109,7 @@ class AdaptiveBottomNavigationBar {
     int? selectedIndex,
     ValueChanged<int>? onTap,
     bool? useNativeBottomBar,
+    bool? useTabBarController,
     CupertinoTabBar? cupertinoTabBar,
     Widget? bottomNavigationBar,
     Color? selectedItemColor,
@@ -104,6 +120,7 @@ class AdaptiveBottomNavigationBar {
       selectedIndex: selectedIndex ?? this.selectedIndex,
       onTap: onTap ?? this.onTap,
       useNativeBottomBar: useNativeBottomBar ?? this.useNativeBottomBar,
+      useTabBarController: useTabBarController ?? this.useTabBarController,
       cupertinoTabBar: cupertinoTabBar ?? this.cupertinoTabBar,
       bottomNavigationBar: bottomNavigationBar ?? this.bottomNavigationBar,
       selectedItemColor: selectedItemColor ?? this.selectedItemColor,

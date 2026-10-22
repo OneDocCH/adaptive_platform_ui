@@ -29,6 +29,8 @@ class _MainPageState extends State<MainPage> {
               ).contains(RouteConstants().badgeNavigation)
               ? null
               : AdaptiveBottomNavigationBar(
+                  // Keeps the Search tab detached on iOS 27 (see README).
+                  useTabBarController: true,
                   selectedIndex: widget.navigationShell.currentIndex,
                   onTap: (index) => onDestinationSelected(index, context),
                   items: [
