@@ -38,6 +38,7 @@ class iOS26SwitchView: NSObject, FlutterPlatformView {
     // Configuration
     private var isEnabled: Bool = true
     private var isDark: Bool = false
+    private var enableHapticFeedback: Bool = true
 
     init(
         frame: CGRect,
@@ -52,6 +53,7 @@ class iOS26SwitchView: NSObject, FlutterPlatformView {
             switchId = config["id"] as? Int ?? 0
             isEnabled = config["enabled"] as? Bool ?? true
             isDark = config["isDark"] as? Bool ?? false
+            enableHapticFeedback = config["enableHapticFeedback"] as? Bool ?? true
         } else {
             switchId = 0
         }
@@ -129,9 +131,11 @@ class iOS26SwitchView: NSObject, FlutterPlatformView {
         // Notify Flutter side about value change
         channel.invokeMethod("valueChanged", arguments: ["value": switchControl.isOn])
 
-        // Add haptic feedback
-        let impact = UIImpactFeedbackGenerator(style: .light)
-        impact.impactOccurred()
+        // Trigger haptics only when enabled by the Flutter widget.
+        if enableHapticFeedback {
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred()
+        }
     }
 
     private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -149,6 +153,13 @@ class iOS26SwitchView: NSObject, FlutterPlatformView {
                 isEnabled = enabled
                 switchControl.isEnabled = enabled
                 switchControl.alpha = enabled ? 1.0 : 0.5
+            }
+            result(nil)
+
+        case "setEnableHapticFeedback":
+            if let args = call.arguments as? [String: Any],
+               let enabled = args["enabled"] as? Bool {
+                enableHapticFeedback = enabled
             }
             result(nil)
 

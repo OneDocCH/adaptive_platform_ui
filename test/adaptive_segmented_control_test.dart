@@ -4,6 +4,23 @@ import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
 void main() {
   group('AdaptiveSegmentedControl', () {
+    test('haptic feedback is enabled by default and can be disabled', () {
+      const defaultControl = AdaptiveSegmentedControl(
+        labels: ['One', 'Two'],
+        selectedIndex: 0,
+        onValueChanged: _ignoreSelection,
+      );
+      const silentControl = AdaptiveSegmentedControl(
+        labels: ['One', 'Two'],
+        selectedIndex: 0,
+        onValueChanged: _ignoreSelection,
+        enableHapticFeedback: false,
+      );
+
+      expect(defaultControl.enableHapticFeedback, isTrue);
+      expect(silentControl.enableHapticFeedback, isFalse);
+    });
+
     testWidgets('creates segmented control with labels', (
       WidgetTester tester,
     ) async {
@@ -424,3 +441,6 @@ void main() {
     });
   });
 }
+
+/// Ignores segmented-control selections in immutable constructor tests.
+void _ignoreSelection(int index) {}

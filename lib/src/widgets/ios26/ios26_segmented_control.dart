@@ -21,6 +21,7 @@ class IOS26SegmentedControl extends StatefulWidget {
     this.iconColor,
     this.textColor,
     this.selectedTextColor,
+    this.enableHapticFeedback = true,
   });
 
   /// Segment labels to display, in order
@@ -58,6 +59,9 @@ class IOS26SegmentedControl extends StatefulWidget {
 
   /// Optional text color for the selected segment.
   final Color? selectedTextColor;
+
+  /// Whether selecting a segment triggers native haptic feedback.
+  final bool enableHapticFeedback;
 
   @override
   State<IOS26SegmentedControl> createState() => _IOS26SegmentedControlState();
@@ -149,6 +153,12 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
       });
     }
 
+    if (oldWidget.enableHapticFeedback != widget.enableHapticFeedback) {
+      _channel.invokeMethod('setEnableHapticFeedback', {
+        'enabled': widget.enableHapticFeedback,
+      });
+    }
+
     _syncThemeIfNeeded();
   }
 
@@ -176,9 +186,7 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
 
     final effectiveSelectedTextColor =
         widget.selectedTextColor ??
-        (widget.color != null
-            ? CupertinoColors.white
-            : effectiveTextColor);
+        (widget.color != null ? CupertinoColors.white : effectiveTextColor);
 
     return <String, dynamic>{
       'textColor': _colorToARGB(effectiveTextColor),
@@ -194,6 +202,7 @@ class _IOS26SegmentedControlState extends State<IOS26SegmentedControl> {
       'labels': widget.labels,
       'selectedIndex': widget.selectedIndex,
       'enabled': widget.enabled,
+      'enableHapticFeedback': widget.enableHapticFeedback,
       'isDark': isDark,
       ..._buildThemeParams(),
     };

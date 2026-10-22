@@ -40,6 +40,7 @@ class iOS26SliderView: NSObject, FlutterPlatformView {
     private var maxValue: Float = 1.0
     private var isEnabled: Bool = true
     private var isDark: Bool = false
+    private var enableHapticFeedback: Bool = true
 
     init(
         frame: CGRect,
@@ -54,6 +55,7 @@ class iOS26SliderView: NSObject, FlutterPlatformView {
             sliderId = config["id"] as? Int ?? 0
             isEnabled = config["enabled"] as? Bool ?? true
             isDark = config["isDark"] as? Bool ?? false
+            enableHapticFeedback = config["enableHapticFeedback"] as? Bool ?? true
 
             if let min = config["min"] as? Double {
                 minValue = Float(min)
@@ -144,9 +146,11 @@ class iOS26SliderView: NSObject, FlutterPlatformView {
         // Notify Flutter side about value change
         channel.invokeMethod("valueChanged", arguments: ["value": Double(sliderControl.value)])
 
-        // Add haptic feedback
-        let impact = UIImpactFeedbackGenerator(style: .light)
-        impact.impactOccurred()
+        // Trigger haptics only when enabled by the Flutter widget.
+        if enableHapticFeedback {
+            let impact = UIImpactFeedbackGenerator(style: .light)
+            impact.impactOccurred()
+        }
     }
 
     @objc private func sliderTouchDown() {
@@ -158,9 +162,11 @@ class iOS26SliderView: NSObject, FlutterPlatformView {
         // Notify Flutter side about touch end
         channel.invokeMethod("changeEnd", arguments: ["value": Double(sliderControl.value)])
 
-        // Add haptic feedback
-        let impact = UIImpactFeedbackGenerator(style: .medium)
-        impact.impactOccurred()
+        // Trigger haptics only when enabled by the Flutter widget.
+        if enableHapticFeedback {
+            let impact = UIImpactFeedbackGenerator(style: .medium)
+            impact.impactOccurred()
+        }
     }
 
     private func handleMethodCall(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -191,6 +197,13 @@ class iOS26SliderView: NSObject, FlutterPlatformView {
                 isEnabled = enabled
                 sliderControl.isEnabled = enabled
                 sliderControl.alpha = enabled ? 1.0 : 0.5
+            }
+            result(nil)
+
+        case "setEnableHapticFeedback":
+            if let args = call.arguments as? [String: Any],
+               let enabled = args["enabled"] as? Bool {
+                enableHapticFeedback = enabled
             }
             result(nil)
 

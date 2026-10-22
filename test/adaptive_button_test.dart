@@ -5,6 +5,18 @@ import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
 void main() {
   group('AdaptiveButton', () {
+    test('haptic feedback is enabled by default and can be disabled', () {
+      const defaultButton = AdaptiveButton(onPressed: null, label: 'Default');
+      const silentButton = AdaptiveButton(
+        onPressed: null,
+        label: 'Silent',
+        enableHapticFeedback: false,
+      );
+
+      expect(defaultButton.enableHapticFeedback, isTrue);
+      expect(silentButton.enableHapticFeedback, isFalse);
+    });
+
     testWidgets('creates button with label', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -164,6 +176,18 @@ void main() {
   });
 
   group('IOS26Button', () {
+    test('haptic feedback is enabled by default and can be disabled', () {
+      const defaultButton = IOS26Button(onPressed: null, label: 'Default');
+      const silentButton = IOS26Button(
+        onPressed: null,
+        label: 'Silent',
+        enableHapticFeedback: false,
+      );
+
+      expect(defaultButton.enableHapticFeedback, isTrue);
+      expect(silentButton.enableHapticFeedback, isFalse);
+    });
+
     testWidgets('creates iOS 26 button with label', (
       WidgetTester tester,
     ) async {

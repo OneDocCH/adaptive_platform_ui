@@ -69,6 +69,7 @@ class IOS26Button extends StatefulWidget {
     this.borderRadius,
     this.minSize,
     this.useSmoothRectangleBorder = true,
+    this.enableHapticFeedback = true,
   }) : child = null,
        isChildMode = false,
        sfSymbol = null;
@@ -87,6 +88,7 @@ class IOS26Button extends StatefulWidget {
     this.borderRadius,
     this.minSize,
     this.useSmoothRectangleBorder = true,
+    this.enableHapticFeedback = true,
   }) : label = '',
        textColor = null,
        isChildMode = true,
@@ -105,6 +107,7 @@ class IOS26Button extends StatefulWidget {
     this.borderRadius,
     this.minSize,
     this.useSmoothRectangleBorder = true,
+    this.enableHapticFeedback = true,
   }) : label = '',
        textColor = null,
        child = null,
@@ -153,6 +156,9 @@ class IOS26Button extends StatefulWidget {
   /// When false, uses perfectly circular/capsule shape
   /// Default is true for smooth rectangle, set to false for circular
   final bool useSmoothRectangleBorder;
+
+  /// Whether tapping the button triggers native haptic feedback.
+  final bool enableHapticFeedback;
 
   @override
   State<IOS26Button> createState() => _IOS26ButtonState();
@@ -239,6 +245,12 @@ class _IOS26ButtonState extends State<IOS26Button> {
       });
     }
 
+    if (oldWidget.enableHapticFeedback != widget.enableHapticFeedback) {
+      _channel.invokeMethod('setEnableHapticFeedback', {
+        'enabled': widget.enableHapticFeedback,
+      });
+    }
+
     // Update SF Symbol if changed
     if (oldWidget.sfSymbol?.name != widget.sfSymbol?.name ||
         oldWidget.sfSymbol?.size != widget.sfSymbol?.size ||
@@ -267,6 +279,7 @@ class _IOS26ButtonState extends State<IOS26Button> {
           : null,
       'isDark': MediaQuery.platformBrightnessOf(context) == Brightness.dark,
       'useSmoothRectangleBorder': widget.useSmoothRectangleBorder,
+      'enableHapticFeedback': widget.enableHapticFeedback,
       if (widget.sfSymbol != null) 'iconName': widget.sfSymbol!.name,
       if (widget.sfSymbol != null) 'iconSize': widget.sfSymbol!.size,
       if (widget.sfSymbol?.color != null)

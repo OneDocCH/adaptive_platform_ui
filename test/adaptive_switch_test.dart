@@ -4,6 +4,18 @@ import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
 
 void main() {
   group('AdaptiveSwitch', () {
+    test('haptic feedback is enabled by default and can be disabled', () {
+      const defaultSwitch = AdaptiveSwitch(value: false, onChanged: null);
+      const silentSwitch = AdaptiveSwitch(
+        value: false,
+        onChanged: null,
+        enableHapticFeedback: false,
+      );
+
+      expect(defaultSwitch.enableHapticFeedback, isTrue);
+      expect(silentSwitch.enableHapticFeedback, isFalse);
+    });
+
     testWidgets('creates switch with initial value', (
       WidgetTester tester,
     ) async {
@@ -73,6 +85,18 @@ void main() {
   });
 
   group('AdaptiveSlider', () {
+    test('haptic feedback is enabled by default and can be disabled', () {
+      const defaultSlider = AdaptiveSlider(value: 0.5, onChanged: null);
+      const silentSlider = AdaptiveSlider(
+        value: 0.5,
+        onChanged: null,
+        enableHapticFeedback: false,
+      );
+
+      expect(defaultSlider.enableHapticFeedback, isTrue);
+      expect(silentSlider.enableHapticFeedback, isFalse);
+    });
+
     testWidgets('creates slider with initial value', (
       WidgetTester tester,
     ) async {

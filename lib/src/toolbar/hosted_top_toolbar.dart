@@ -305,6 +305,8 @@ class _BackButton extends StatelessWidget {
         sfSymbol: const SFSymbol('chevron.left', size: 20),
         size: AdaptiveButtonSize.large,
         useSmoothRectangleBorder: false,
+        // No haptic, like the system back button it stands in for.
+        enableHapticFeedback: false,
       ),
     );
   }

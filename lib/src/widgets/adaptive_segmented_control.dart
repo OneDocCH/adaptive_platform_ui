@@ -24,6 +24,7 @@ class AdaptiveSegmentedControl extends StatelessWidget {
     this.iconColor,
     this.textColor,
     this.selectedTextColor,
+    this.enableHapticFeedback = true,
   });
 
   /// Segment labels to display, in order
@@ -62,6 +63,9 @@ class AdaptiveSegmentedControl extends StatelessWidget {
   /// Optional text color for the selected segment.
   final Color? selectedTextColor;
 
+  /// Whether the native iOS 26 control triggers haptic feedback on selection.
+  final bool enableHapticFeedback;
+
   @override
   Widget build(BuildContext context) {
     // iOS 26+ - Use native iOS 26 segmented control
@@ -79,6 +83,7 @@ class AdaptiveSegmentedControl extends StatelessWidget {
         iconColor: iconColor,
         textColor: textColor,
         selectedTextColor: selectedTextColor,
+        enableHapticFeedback: enableHapticFeedback,
       );
     }
 
