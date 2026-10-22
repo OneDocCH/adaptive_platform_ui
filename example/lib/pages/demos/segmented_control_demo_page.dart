@@ -12,6 +12,7 @@ class SegmentedControlDemoPage extends StatefulWidget {
 
 class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
   int _basicSegmentedControlIndex = 0;
+  int _silentSegmentedControlIndex = 0;
   int _coloredSegmentedControlIndex = 1;
   int _shrinkWrappedSegmentedControlIndex = 0;
   int _iconSegmentedControlIndex = 0;
@@ -62,6 +63,28 @@ class _SegmentedControlDemoPageState extends State<SegmentedControlDemoPage> {
               selectedIndex: _basicSegmentedControlIndex,
               onValueChanged: (i) =>
                   setState(() => _basicSegmentedControlIndex = i),
+            ),
+
+            const SizedBox(height: 48),
+
+            Text(
+              'Without Haptic Feedback (iOS 26+)',
+              style: TextStyle(
+                color: PlatformInfo.isIOS
+                    ? (MediaQuery.platformBrightnessOf(context) ==
+                              Brightness.dark
+                          ? CupertinoColors.white
+                          : CupertinoColors.black)
+                    : null,
+              ),
+            ),
+            const SizedBox(height: 12),
+            AdaptiveSegmentedControl(
+              labels: const ['One', 'Two', 'Three'],
+              selectedIndex: _silentSegmentedControlIndex,
+              enableHapticFeedback: false,
+              onValueChanged: (i) =>
+                  setState(() => _silentSegmentedControlIndex = i),
             ),
 
             const SizedBox(height: 48),

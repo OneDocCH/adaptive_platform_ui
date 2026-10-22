@@ -11,6 +11,7 @@ class SliderDemoPage extends StatefulWidget {
 
 class _SliderDemoPageState extends State<SliderDemoPage> {
   double _basicValue = 0.5;
+  double _silentValue = 0.5;
   double _blueValue = 0.3;
   double _redValue = 0.7;
   double _greenValue = 0.6;
@@ -52,6 +53,15 @@ class _SliderDemoPageState extends State<SliderDemoPage> {
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(height: 32),
+        _buildSection(
+          'Without Haptic Feedback (iOS 26+)',
+          AdaptiveSlider(
+            value: _silentValue,
+            enableHapticFeedback: false,
+            onChanged: (value) => setState(() => _silentValue = value),
           ),
         ),
         const SizedBox(height: 32),

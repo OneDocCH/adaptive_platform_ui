@@ -11,6 +11,7 @@ class SwitchDemoPage extends StatefulWidget {
 
 class _SwitchDemoPageState extends State<SwitchDemoPage> {
   bool _basicSwitch = false;
+  bool _silentSwitch = false;
   bool _customColorSwitch = true;
   bool _redSwitch = false;
   bool _greenSwitch = true;
@@ -68,6 +69,19 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
             'Default Switch',
             _basicSwitch,
             (value) => setState(() => _basicSwitch = value),
+          ),
+        ),
+
+        const SizedBox(height: 32),
+
+        // Without Haptic Feedback
+        _buildSection(
+          'Without Haptic Feedback (iOS 26+)',
+          _buildSwitchRow(
+            'Silent Switch',
+            _silentSwitch,
+            (value) => setState(() => _silentSwitch = value),
+            enableHapticFeedback: false,
           ),
         ),
 
@@ -179,6 +193,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
     bool value,
     ValueChanged<bool>? onChanged, {
     Color? activeColor,
+    bool enableHapticFeedback = true,
   }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -188,6 +203,7 @@ class _SwitchDemoPageState extends State<SwitchDemoPage> {
           value: value,
           onChanged: onChanged,
           activeColor: activeColor,
+          enableHapticFeedback: enableHapticFeedback,
         ),
       ],
     );
