@@ -57,6 +57,10 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
     private var isDark: Bool = false
     private var perActionTintTags: Set<Int> = []
 
+    /// What the items were last made from, at creation or by `updateActions`,
+    /// so `relayout` can make them anew.
+    private var itemParams: [String: Any] = [:]
+
     init(
         frame: CGRect,
         viewIdentifier viewId: Int64,
@@ -92,6 +96,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
 
         if let params = args as? [String: Any] {
             configureItems(params)
+            itemParams = params
             // Apply global tint color after configuring items
             if let n = params["tint"] as? NSNumber {
                 let color = Self.colorFromARGB(n.intValue)
@@ -373,16 +378,7 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
             result(nil)
         case "updateActions":
             if let args = call.arguments as? [String: Any] {
-                perActionTintTags.removeAll()
-                configureItems(args)
-                // Re-apply global tint to items without per-action tint
-                if let globalTint = navigationBar.tintColor {
-                    for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
-                        if !perActionTintTags.contains(item.tag) {
-                            item.tintColor = globalTint
-                        }
-                    }
-                }
+                remakeItems(from: args)
             }
             result(nil)
         case "setStyle":
@@ -409,8 +405,40 @@ class iOS26ToolbarPlatformView: NSObject, FlutterPlatformView {
                 }
             }
             result(nil)
+        case "relayout":
+            // Sent once the page has arrived. A bar laid out while its page
+            // slid in can keep that layout until a light/dark switch has UIKit
+            // lay it out again, so this replays what a switch does: the style
+            // is flipped and restored, the items are made anew and the bar is
+            // laid out, all before anything is drawn.
+            if #available(iOS 17.0, *) {
+                let style = containerView.overrideUserInterfaceStyle
+                containerView.overrideUserInterfaceStyle = (style == .dark) ? .light : .dark
+                containerView.updateTraitsIfNeeded()
+                containerView.overrideUserInterfaceStyle = style
+                containerView.updateTraitsIfNeeded()
+            }
+            remakeItems(from: itemParams)
+            navigationBar.setNeedsLayout()
+            navigationBar.layoutIfNeeded()
+            result(nil)
         default:
             result(FlutterMethodNotImplemented)
+        }
+    }
+
+    /// Makes the items anew from `params`, the ones without a tint of their
+    /// own taking the bar's.
+    private func remakeItems(from params: [String: Any]) {
+        perActionTintTags.removeAll()
+        configureItems(params)
+        itemParams = params
+        if let globalTint = navigationBar.tintColor {
+            for item in (navigationItem.leftBarButtonItems ?? []) + (navigationItem.rightBarButtonItems ?? []) {
+                if !perActionTintTags.contains(item.tag) {
+                    item.tintColor = globalTint
+                }
+            }
         }
     }
 
