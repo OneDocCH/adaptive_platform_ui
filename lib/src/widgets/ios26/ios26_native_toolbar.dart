@@ -59,6 +59,10 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
   int? _lastTint;
   List<AdaptiveAppBarAction>? _lastActions;
 
+  /// The route this toolbar's page is shown in, followed to the end of its
+  /// arrival (see [_onRouteStatus]).
+  ModalRoute<dynamic>? _route;
+
   bool get _isDark =>
       MediaQuery.platformBrightnessOf(context) == Brightness.dark;
 
@@ -81,7 +85,39 @@ class _IOS26NativeToolbarState extends State<IOS26NativeToolbar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    _followRoute(ModalRoute.of(context));
     _syncPropsToNativeIfNeeded();
+  }
+
+  @override
+  void dispose() {
+    _followRoute(null);
+    super.dispose();
+  }
+
+  void _followRoute(ModalRoute<dynamic>? route) {
+    if (identical(route, _route)) return;
+    _route?.animation?.removeStatusListener(_onRouteStatus);
+    _route = route;
+    _route?.animation?.addStatusListener(_onRouteStatus);
+  }
+
+  /// Once the page has arrived, has the native bar lay its items out again.
+  ///
+  /// A bar created while its page slides in can keep the item layout it got
+  /// during the transition: on an iPhone 14 Pro running iOS 27, the leading
+  /// item of such a bar sat against the screen edge, with no leading margin,
+  /// until a light/dark switch made UIKit lay the bar out again.
+  void _onRouteStatus(AnimationStatus status) {
+    if (status == AnimationStatus.completed) _relayout();
+  }
+
+  Future<void> _relayout() async {
+    try {
+      await _channel?.invokeMethod('relayout');
+    } catch (e) {
+      // Ignore errors if platform view is not yet ready
+    }
   }
 
   @override
