@@ -73,6 +73,19 @@ class AdaptivePopupMenuDivider extends AdaptivePopupMenuEntry {
   final String? title;
 }
 
+/// Closes the native menu of an [IOS26PopupMenuButton] from outside it, as a
+/// tap elsewhere would.
+///
+/// Pair it with `onOpen` / `onClose` to cover something while the menu is open:
+/// UIKit lets a few touches through to other controls, which can act under it.
+class AdaptivePopupMenuController {
+  Future<void> Function()? _close;
+
+  /// Closes the menu if it is open. Does nothing while it is not, or while no
+  /// native menu button is attached.
+  Future<void> close() async => _close?.call();
+}
+
 /// Button style for popup menu button
 enum PopupButtonStyle {
   plain,
@@ -93,6 +106,9 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     required this.buttonLabel,
     required this.items,
     required this.onSelected,
+    this.onOpen,
+    this.onClose,
+    this.controller,
     this.tint,
     this.height = 32.0,
     this.shrinkWrap = false,
@@ -111,6 +127,9 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     required this.buttonIcon,
     required this.items,
     required this.onSelected,
+    this.onOpen,
+    this.onClose,
+    this.controller,
     this.tint,
     double size = 44.0,
     this.iconSize,
@@ -129,6 +148,9 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
     super.key,
     required this.items,
     required this.onSelected,
+    this.onOpen,
+    this.onClose,
+    this.controller,
     this.tint,
     this.buttonStyle = PopupButtonStyle.plain,
     this.triggerOnLongPress = false,
@@ -180,6 +202,15 @@ class IOS26PopupMenuButton<T> extends StatefulWidget {
   /// Called with the selected index when the user makes a selection
   final void Function(int index, AdaptivePopupMenuItem<T> entry) onSelected;
 
+  /// Called as the menu opens.
+  final VoidCallback? onOpen;
+
+  /// Called as the menu closes, whether an item was selected or not.
+  final VoidCallback? onClose;
+
+  /// Closes the menu from outside the button.
+  final AdaptivePopupMenuController? controller;
+
   /// Tint color for the control
   final Color? tint;
 
@@ -212,6 +243,12 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
       widget.tint ?? CupertinoTheme.of(context).primaryColor;
 
   @override
+  void initState() {
+    super.initState();
+    widget.controller?._close = _closeMenu;
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _syncBrightnessIfNeeded();
@@ -220,6 +257,10 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
   @override
   void didUpdateWidget(IOS26PopupMenuButton<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      _detach(oldWidget.controller);
+      widget.controller?._close = _closeMenu;
+    }
     // Sync any changes to brightness or tint
     _syncBrightnessIfNeeded();
 
@@ -329,8 +370,20 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
 
   @override
   void dispose() {
+    _detach(widget.controller);
     _channel?.setMethodCallHandler(null);
     super.dispose();
+  }
+
+  /// Leaves [controller] closing nothing, unless another button took it since.
+  void _detach(AdaptivePopupMenuController? controller) {
+    if (controller?._close == _closeMenu) controller!._close = null;
+  }
+
+  Future<void> _closeMenu() async {
+    try {
+      await _channel?.invokeMethod('dismissMenu');
+    } catch (_) {}
   }
 
   int _colorToARGB(Color color) {
@@ -522,7 +575,11 @@ class _IOS26PopupMenuButtonState<T> extends State<IOS26PopupMenuButton<T>> {
   }
 
   Future<dynamic> _onMethodCall(MethodCall call) async {
-    if (call.method == 'itemSelected') {
+    if (call.method == 'menuOpened') {
+      widget.onOpen?.call();
+    } else if (call.method == 'menuClosed') {
+      widget.onClose?.call();
+    } else if (call.method == 'itemSelected') {
       final args = call.arguments as Map?;
       final idx = (args?['index'] as num?)?.toInt();
 

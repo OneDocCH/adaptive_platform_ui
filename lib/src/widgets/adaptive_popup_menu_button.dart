@@ -5,12 +5,16 @@ import 'ios26/ios26_popup_menu_button.dart';
 
 export 'ios26/ios26_popup_menu_button.dart'
     show
+        AdaptivePopupMenuController,
         AdaptivePopupMenuItem,
         AdaptivePopupMenuDivider,
         AdaptivePopupMenuEntry,
         PopupButtonStyle;
 
 /// An adaptive popup menu button that renders platform-specific styles
+///
+/// `onOpen`, `onClose` and `controller` reach the native menu of iOS 26+ only:
+/// elsewhere the menu is a route of the app's own, which its navigator covers.
 class AdaptivePopupMenuButton<T> {
   AdaptivePopupMenuButton._();
 
@@ -21,6 +25,9 @@ class AdaptivePopupMenuButton<T> {
     required List<AdaptivePopupMenuEntry> items,
     required void Function(int index, AdaptivePopupMenuItem<T> entry)
     onSelected,
+    VoidCallback? onOpen,
+    VoidCallback? onClose,
+    AdaptivePopupMenuController? controller,
     Color? tint,
     double height = 32.0,
     bool shrinkWrap = false,
@@ -32,6 +39,9 @@ class AdaptivePopupMenuButton<T> {
         buttonLabel: label,
         items: items,
         onSelected: onSelected,
+        onOpen: onOpen,
+        onClose: onClose,
+        controller: controller,
         tint: tint,
         height: height,
         shrinkWrap: shrinkWrap,
@@ -69,6 +79,9 @@ class AdaptivePopupMenuButton<T> {
     required List<AdaptivePopupMenuEntry> items,
     required void Function(int index, AdaptivePopupMenuItem<T> entry)
     onSelected,
+    VoidCallback? onOpen,
+    VoidCallback? onClose,
+    AdaptivePopupMenuController? controller,
     Color? tint,
     PopupButtonStyle buttonStyle = PopupButtonStyle.plain,
     bool triggerOnLongPress = false,
@@ -85,6 +98,9 @@ class AdaptivePopupMenuButton<T> {
       return IOS26PopupMenuButton<T>.widget(
         items: items,
         onSelected: onSelected,
+        onOpen: onOpen,
+        onClose: onClose,
+        controller: controller,
         tint: tint,
         buttonStyle: buttonStyle,
         triggerOnLongPress: triggerOnLongPress,
@@ -130,6 +146,9 @@ class AdaptivePopupMenuButton<T> {
     required List<AdaptivePopupMenuEntry> items,
     required void Function(int index, AdaptivePopupMenuItem<T> entry)
     onSelected,
+    VoidCallback? onOpen,
+    VoidCallback? onClose,
+    AdaptivePopupMenuController? controller,
     Color? tint,
     double size = 44.0,
     double? iconSize,
@@ -141,6 +160,9 @@ class AdaptivePopupMenuButton<T> {
         buttonIcon: icon is String ? icon : 'ellipsis.circle',
         items: items,
         onSelected: onSelected,
+        onOpen: onOpen,
+        onClose: onClose,
+        controller: controller,
         tint: tint,
         size: size,
         iconSize: iconSize,

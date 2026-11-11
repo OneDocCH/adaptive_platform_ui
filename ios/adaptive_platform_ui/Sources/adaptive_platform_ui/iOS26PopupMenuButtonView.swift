@@ -1,11 +1,35 @@
 import Flutter
 import UIKit
 
+/// A button reporting when the menu it shows opens and closes.
+private class MenuEventsButton: UIButton {
+    var onMenuOpen: (() -> Void)?
+    var onMenuClose: (() -> Void)?
+
+    override func contextMenuInteraction(
+        _ interaction: UIContextMenuInteraction,
+        willDisplayMenuFor configuration: UIContextMenuConfiguration,
+        animator: UIContextMenuInteractionAnimating?
+    ) {
+        super.contextMenuInteraction(interaction, willDisplayMenuFor: configuration, animator: animator)
+        onMenuOpen?()
+    }
+
+    override func contextMenuInteraction(
+        _ interaction: UIContextMenuInteraction,
+        willEndFor configuration: UIContextMenuConfiguration,
+        animator: UIContextMenuInteractionAnimating?
+    ) {
+        super.contextMenuInteraction(interaction, willEndFor: configuration, animator: animator)
+        onMenuClose?()
+    }
+}
+
 /// Platform view for iOS 26 popup menu button
 class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
     private let channel: FlutterMethodChannel
     private let container: UIView
-    private let button: UIButton
+    private let button: MenuEventsButton
     private var currentButtonStyle: String = "plain"
     private var isRoundButton: Bool = false
     private var labels: [String] = []
@@ -20,7 +44,7 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
     init(frame: CGRect, viewId: Int64, args: Any?, messenger: FlutterBinaryMessenger) {
         self.channel = FlutterMethodChannel(name: "adaptive_platform_ui/ios26_popup_menu_button_\(viewId)", binaryMessenger: messenger)
         self.container = UIView(frame: frame)
-        self.button = UIButton(type: .system)
+        self.button = MenuEventsButton(type: .system)
 
         var title: String? = nil
         var iconName: String? = nil
@@ -61,6 +85,9 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
         }
 
         super.init()
+
+        button.onMenuOpen = { [weak self] in self?.channel.invokeMethod("menuOpened", arguments: nil) }
+        button.onMenuClose = { [weak self] in self?.channel.invokeMethod("menuClosed", arguments: nil) }
 
         container.backgroundColor = .clear
         if #available(iOS 13.0, *) { container.overrideUserInterfaceStyle = isDark ? .dark : .light }
@@ -155,6 +182,9 @@ class iOS26PopupMenuButtonView: NSObject, FlutterPlatformView {
                     self.rebuildMenu()
                     result(nil)
                 } else { result(FlutterError(code: "bad_args", message: "Missing menu items", details: nil)) }
+            case "dismissMenu":
+                self.button.contextMenuInteraction?.dismissMenu()
+                result(nil)
             case "updateButtonContent":
                 if let args = call.arguments as? [String: Any] {
                     let title = args["buttonTitle"] as? String

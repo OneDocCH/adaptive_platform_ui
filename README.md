@@ -527,6 +527,22 @@ AdaptivePopupMenuButton.text<String>(
   ],
   onSelected: (index, item) => setState(() => currentValue = item.value!),
 )
+
+// Know when the native menu opens and closes, and close it from outside.
+// iOS 26+ only: elsewhere the menu is a route of the app's own.
+final menu = AdaptivePopupMenuController();
+
+AdaptivePopupMenuButton.widget<String>(
+  items: [...],
+  onSelected: (index, item) { },
+  onOpen: () => print('Menu opened'),
+  onClose: () => print('Menu closed'), // after a selection too
+  controller: menu,
+  child: const Icon(CupertinoIcons.ellipsis),
+)
+
+// Later, for example when a touch UIKit let through lands on another control:
+menu.close();
 ```
 
 ### AdaptiveSegmentedControl
