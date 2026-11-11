@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:adaptive_platform_ui_example/utils/extensions/extensions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +18,20 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
   String _selectedValue = '';
   bool _editMode = false;
   Uint8List? _avatarBytes;
+  bool _menuOpen = false;
+  final _timedMenu = AdaptivePopupMenuController();
+  Timer? _closeTimer;
 
   @override
   void initState() {
     super.initState();
     _loadAvatar();
+  }
+
+  @override
+  void dispose() {
+    _closeTimer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadAvatar() async {
@@ -902,6 +913,47 @@ class _PopupMenuDemoPageState extends State<PopupMenuDemoPage> {
                 ],
               ),
             ),
+          ),
+        ),
+      ]),
+      const SizedBox(height: 24),
+
+      // Open and close events, reported by the iOS 26+ native menu
+      _buildSection('Open & Close (iOS 26+)', [
+        _buildDemo(
+          _menuOpen ? 'Menu open' : 'Menu closed',
+          AdaptivePopupMenuButton.text<String>(
+            label: 'Watched',
+            items: _basicMenuItems(),
+            onSelected: (index, item) {
+              setState(() {
+                _selectedAction = item.label;
+                _selectedValue = item.value ?? '';
+              });
+            },
+            onOpen: () => setState(() => _menuOpen = true),
+            onClose: () => setState(() => _menuOpen = false),
+            buttonStyle: PopupButtonStyle.bordered,
+          ),
+        ),
+        _buildDemo(
+          'Closes after 3 s',
+          AdaptivePopupMenuButton.text<String>(
+            label: 'Timed',
+            items: _basicMenuItems(),
+            onSelected: (index, item) {
+              setState(() {
+                _selectedAction = item.label;
+                _selectedValue = item.value ?? '';
+              });
+            },
+            controller: _timedMenu,
+            onOpen: () {
+              _closeTimer?.cancel();
+              _closeTimer = Timer(const Duration(seconds: 3), _timedMenu.close);
+            },
+            onClose: () => _closeTimer?.cancel(),
+            buttonStyle: PopupButtonStyle.bordered,
           ),
         ),
       ]),

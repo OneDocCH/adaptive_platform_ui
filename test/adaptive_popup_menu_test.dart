@@ -21,6 +21,16 @@ void main() {
     });
   });
 
+  group('AdaptivePopupMenuController', () {
+    // The menu opening and closing are reported by the iOS 26+ native view,
+    // which the test host never builds (`Platform.isIOS` is false), so this
+    // covers the Dart side. Only that view attaches to the controller; before
+    // it does, or anywhere else, closing has nothing to close.
+    test('closes nothing while no menu button is attached', () async {
+      await expectLater(AdaptivePopupMenuController().close(), completes);
+    });
+  });
+
   group('AdaptivePopupMenuItem subtitle/imageBytes', () {
     test('default to null', () {
       const item = AdaptivePopupMenuItem<String>(label: 'Edit');
