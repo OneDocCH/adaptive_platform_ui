@@ -43,16 +43,26 @@ class TintAdjustingAlertController: UIAlertController {
     }
 
     private func addCustomDimmingView() {
-        guard let presentingVC = presentingViewController,
-              backgroundDimmingView == nil else { return }
+        guard backgroundDimmingView == nil else { return }
 
         let dimmingView = UIView()
         dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.3)
-        dimmingView.frame = presentingVC.view.bounds
         dimmingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         dimmingView.alpha = 0
 
-        presentingVC.view.insertSubview(dimmingView, belowSubview: view)
+        // At the bottom of the presentation's container: under the alert, over the whole app.
+        // Inserted in the presenting view instead, it sat under any subview the host adds back on
+        // top: Flutter re-adds its platform views whenever they change, so those stayed undimmed.
+        if let container = presentationController?.containerView
+            ?? transitionCoordinator?.containerView {
+            dimmingView.frame = container.bounds
+            container.insertSubview(dimmingView, at: 0)
+        } else if let presentingView = presentingViewController?.view {
+            dimmingView.frame = presentingView.bounds
+            presentingView.insertSubview(dimmingView, belowSubview: view)
+        } else {
+            return
+        }
         backgroundDimmingView = dimmingView
 
         UIView.animate(withDuration: 0.3) {
