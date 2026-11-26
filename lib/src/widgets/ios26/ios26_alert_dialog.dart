@@ -233,14 +233,14 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
             // Input dialog
             if (action.style == AlertActionStyle.cancel) {
               // Cancel button returns null for input dialogs
-              Navigator.of(context).pop<String?>(null);
+              _closeRoute(null);
             } else {
               // Other buttons return the text field value
-              Navigator.of(context).pop<String?>(textFieldValue);
+              _closeRoute(textFieldValue);
             }
           } else {
             // Normal dialog - just close without returning a value
-            Navigator.of(context).pop();
+            _closeRoute(null);
           }
         }
 
@@ -249,6 +249,24 @@ class _IOS26AlertDialogState extends State<IOS26AlertDialog> {
       }
     }
     return null;
+  }
+
+  /// Closes the route showing this dialog, with [result].
+  ///
+  /// UIKit takes every touch while the alert is up, but a route can still be
+  /// pushed over this one without a tap (from a lifecycle callback or a deep
+  /// link). Popping would then close that route and leave this one, invisible,
+  /// over the app. So this route is popped only when it is on top, removed
+  /// from under the routes above it otherwise, and left alone once something
+  /// else has closed it.
+  void _closeRoute(String? result) {
+    final navigator = Navigator.of(context);
+    final route = ModalRoute.of(context);
+    if (route == null || route.isCurrent) {
+      navigator.pop(result);
+    } else if (route.isActive) {
+      navigator.removeRoute(route, result);
+    }
   }
 
   Future<void> _syncBrightnessIfNeeded() async {
