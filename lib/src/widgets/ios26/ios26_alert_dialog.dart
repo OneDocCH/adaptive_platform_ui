@@ -11,6 +11,10 @@ enum AlertActionStyle {
   defaultAction,
 
   /// Cancel style for dismissing actions
+  ///
+  /// On iOS 26 it is the alert's own cancel, which UIKit places itself and
+  /// which Esc and VoiceOver's escape gesture trigger. An alert takes one: any
+  /// further cancel action is drawn as [defaultAction].
   cancel,
 
   /// Destructive style for dangerous actions

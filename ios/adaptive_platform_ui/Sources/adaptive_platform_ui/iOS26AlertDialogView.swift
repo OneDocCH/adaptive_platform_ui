@@ -414,6 +414,7 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
 
         // Add actions
         var primaryAction: UIAlertAction?
+        var hasCancelAction = false
 
         for (index, actionTitle) in actionTitles.enumerated() {
             let style = index < actionStyles.count ? actionStyles[index] : "defaultAction"
@@ -432,7 +433,11 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
 
             switch style {
             case "cancel":
-                alertActionStyle = .default
+                // UIKit's own cancel, which it places itself and which Esc and VoiceOver's escape
+                // gesture trigger. UIKit throws on a second one, so any further cancel is a plain
+                // action.
+                alertActionStyle = hasCancelAction ? .default : .cancel
+                hasCancelAction = true
                 textColor = nil
             case "destructive":
                 alertActionStyle = .destructive
