@@ -155,7 +155,20 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
             textFieldKeyboardType: textFieldKeyboardType
         )
 
-        self.channel.setMethodCallHandler(onMethodCall)
+        // Held weakly, so that Flutter disposing of the view releases it: the engine keeps this
+        // handler until it is cleared.
+        self.channel.setMethodCallHandler { [weak self] call, result in
+            guard let self = self else { return result(nil) }
+            self.onMethodCall(call: call, result: result)
+        }
+    }
+
+    // Flutter releases the view once its widget is gone. An alert still up then has lost its
+    // route without a tap (popped, or removed with the page under it), so it closes too, through
+    // its presenter: asked of an alert with another stacked on it, a dismissal closes only that one.
+    deinit {
+        channel.setMethodCallHandler(nil)
+        alertController?.presentingViewController?.dismiss(animated: true)
     }
 
     func view() -> UIView {
