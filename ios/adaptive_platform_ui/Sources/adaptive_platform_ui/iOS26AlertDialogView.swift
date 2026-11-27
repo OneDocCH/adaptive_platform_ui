@@ -43,16 +43,26 @@ class TintAdjustingAlertController: UIAlertController {
     }
 
     private func addCustomDimmingView() {
-        guard let presentingVC = presentingViewController,
-              backgroundDimmingView == nil else { return }
+        guard backgroundDimmingView == nil else { return }
 
         let dimmingView = UIView()
         dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.3)
-        dimmingView.frame = presentingVC.view.bounds
         dimmingView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         dimmingView.alpha = 0
 
-        presentingVC.view.insertSubview(dimmingView, belowSubview: view)
+        // At the bottom of the presentation's container: under the alert, over the whole app.
+        // Inserted in the presenting view instead, it sat under any subview the host adds back on
+        // top: Flutter re-adds its platform views whenever they change, so those stayed undimmed.
+        if let container = presentationController?.containerView
+            ?? transitionCoordinator?.containerView {
+            dimmingView.frame = container.bounds
+            container.insertSubview(dimmingView, at: 0)
+        } else if let presentingView = presentingViewController?.view {
+            dimmingView.frame = presentingView.bounds
+            presentingView.insertSubview(dimmingView, belowSubview: view)
+        } else {
+            return
+        }
         backgroundDimmingView = dimmingView
 
         UIView.animate(withDuration: 0.3) {
@@ -145,7 +155,20 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
             textFieldKeyboardType: textFieldKeyboardType
         )
 
-        self.channel.setMethodCallHandler(onMethodCall)
+        // Held weakly, so that Flutter disposing of the view releases it: the engine keeps this
+        // handler until it is cleared.
+        self.channel.setMethodCallHandler { [weak self] call, result in
+            guard let self = self else { return result(nil) }
+            self.onMethodCall(call: call, result: result)
+        }
+    }
+
+    // Flutter releases the view once its widget is gone. An alert still up then has lost its
+    // route without a tap (popped, or removed with the page under it), so it closes too, through
+    // its presenter: asked of an alert with another stacked on it, a dismissal closes only that one.
+    deinit {
+        channel.setMethodCallHandler(nil)
+        alertController?.presentingViewController?.dismiss(animated: true)
     }
 
     func view() -> UIView {
@@ -404,6 +427,7 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
 
         // Add actions
         var primaryAction: UIAlertAction?
+        var hasCancelAction = false
 
         for (index, actionTitle) in actionTitles.enumerated() {
             let style = index < actionStyles.count ? actionStyles[index] : "defaultAction"
@@ -422,7 +446,11 @@ class iOS26AlertDialogView: NSObject, FlutterPlatformView {
 
             switch style {
             case "cancel":
-                alertActionStyle = .default
+                // UIKit's own cancel, which it places itself and which Esc and VoiceOver's escape
+                // gesture trigger. UIKit throws on a second one, so any further cancel is a plain
+                // action.
+                alertActionStyle = hasCancelAction ? .default : .cancel
+                hasCancelAction = true
                 textColor = nil
             case "destructive":
                 alertActionStyle = .destructive
